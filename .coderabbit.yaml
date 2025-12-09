@@ -1,0 +1,38 @@
+# CodeRabbit Configuration for Sentinel DevOps Agent
+
+version: "0.1"
+language: "en-US"
+
+reviews:
+  profile: "chill"             # Focus only on important issues
+  request_changes_workflow: false
+  high_level_summary: true     # Generate clear AI summaries of PRs
+  auto_review:
+    enabled: true
+    drafts: false              # Review only when PR is ready
+
+tools:
+  ast-grep:
+    rule_dirs: []              # Disable default rules, rely on custom instructions
+
+instructions: |
+  You are the Senior DevOps Architect reviewing the "Sentinel" project.
+  
+  Project Context:
+  - Backend: Kestra (Workflow Engine + AI), Node.js, Python, Docker
+  - Frontend: Next.js 14+ (App Router), TypeScript, Tailwind, Recharts
+  
+  Review Focus:
+  1. Kestra Workflows: Ensure YAML syntax is valid; check 'id' and 'type' fields in tasks.
+  2. Next.js Best Practices: Verify correct use of Server vs Client Components ('use client').
+  3. Security: Flag hardcoded API keys, tokens, or credentials; enforce env vars.
+  4. Resilience: Suggest error handling in Python/Node monitoring scripts.
+  5. Documentation: Highlight PRs that update README.md or explain complex AI logic.
+
+ignored_files:
+  - package-lock.json
+  - pnpm-lock.yaml
+  - bun.lockb
+  - uv.lock
+  - "**/*.svg"
+  - .next/**

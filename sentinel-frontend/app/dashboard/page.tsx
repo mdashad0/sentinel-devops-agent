@@ -28,7 +28,7 @@ export default function DashboardPage() {
                     ...service,
                     latency: realTime.currentResponseTime,
                     cpu: realTime.currentCpu,
-                    status: realTime.currentErrorRate > 1 ? "degraded" : (realTime.currentErrorRate > 5 ? "down" : "healthy"),
+                    status: realTime.currentErrorRate > 0.5 ? "down" : (realTime.currentErrorRate > 0.2 ? "degraded" : "healthy"),
                     trend: newTrend.length > 0 ? newTrend : service.trend,
                 };
             }

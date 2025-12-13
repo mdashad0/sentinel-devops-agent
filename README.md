@@ -2,11 +2,14 @@
 
 <div align="center">
 
+<img src="sentinel-frontend/public/favicon.png" alt="Sentinel Logo" width="120" height="120"/>
+
 ![Sentinel Banner](https://img.shields.io/badge/Status-Active-success?style=for-the-badge) 
 [![Kestra](https://img.shields.io/badge/Orchestration-Kestra-7C3AED?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMiA3TDEyIDEyTDIyIDdMMTIgMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yIDEyTDEyIDE3TDIyIDEyIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+)](https://kestra.io)
 ![Next.js](https://img.shields.io/badge/Dashboard-Next.js_14-black?style=for-the-badge&logo=next.js)
 ![Node.js](https://img.shields.io/badge/Backend-Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![AI](https://img.shields.io/badge/AI-Groq_Llama_3.3-FF6B6B?style=for-the-badge&logo=openai&logoColor=white)
+[![CodeRabbit](https://img.shields.io/badge/CodeRabbit-PR%20Reviews-4B32C3?style=for-the-badge&logo=openai&logoColor=white)](https://coderabbit.ai)
 
 ### *"The On-Call Engineer That Never Sleeps"*
 
@@ -53,7 +56,7 @@ Sentinel combines **AI-powered analysis** with **autonomous orchestration** to c
 Sentinel doesn't just say "Error 500." It uses **Groq's Llama 3.3 70B** to analyze the failure and provide actionable insights.
 
 <div align="center">
-  <img src="screenshots/cline-usage-1.png" alt="Cline AI Analysis" width="700"/>
+  <img src="./screenshots/cline-usage-1.png" alt="Cline AI Analysis" width="700"/>
   <p><em>Cline helping design the AI analysis workflow</em></p>
 </div>
 
@@ -93,7 +96,7 @@ When a critical service crashes, Kestra **automatically** triggers recovery work
 Built with **Next.js 14**, the dashboard provides instant visibility into your infrastructure:
 
 <div align="center">
-  <img src="screenshots/system-healthy.png" alt="System Healthy State" width="700"/>
+  <img src="./screenshots/system-healthy.png" alt="System Healthy State" width="700"/>
   <p><em>Dashboard showing all services healthy (green status)</em></p>
 </div>
 
@@ -104,7 +107,7 @@ Built with **Next.js 14**, the dashboard provides instant visibility into your i
 - 📝 **Activity Feed**: Real-time event stream from Kestra webhooks
 
 <div align="center">
-  <img src="screenshots/system-down.png" alt="System Critical State" width="700"/>
+  <img src="./screenshots/system-down.png" alt="System Critical State" width="700"/>
   <p><em>Dashboard detecting Auth service failure (red alert)</em></p>
 </div>
 
@@ -113,7 +116,7 @@ Built with **Next.js 14**, the dashboard provides instant visibility into your i
 A powerful terminal interface for DevOps engineers, built following the **Cline philosophy** of autonomous workflows.
 
 <div align="center">
-  <img src="screenshots/cli-status.png" alt="Sentinel CLI Status" width="700"/>
+  <img src="./screenshots/cli-status.png" alt="Sentinel CLI Status" width="700"/>
   <p><em>CLI showing live service health with color-coded table</em></p>
 </div>
 
@@ -149,7 +152,7 @@ $ sentinel report
 ```
 
 <div align="center">
-  <img src="screenshots/cli-report.png" alt="Sentinel CLI Report" width="700"/>
+  <img src="./screenshots/cli-report.png" alt="Sentinel CLI Report" width="700"/>
   <p><em>Generated incident report with AI analysis and recovery timeline</em></p>
 </div>
 
@@ -376,19 +379,19 @@ The report includes:
 ### System States
 
 **Healthy State:**
-![Healthy Dashboard](screenshots/system-healthy.png)
+![Healthy Dashboard](./screenshots/system-healthy.png)
 
 **Critical State (Auth Down):**
-![Critical Dashboard](screenshots/system-down.png)
+![Critical Dashboard](./screenshots/system-down.png)
 
 ### Cline Development Process
 
 We used **Cline** extensively during development:
 
-![Cline Usage 1](screenshots/cline-usage-1.png)
+![Cline Usage 1](./screenshots/cline-usage-1.png)
 *Cline helping architect the Kestra workflow*
 
-![Cline Usage 2](screenshots/cline-usage-2.png)
+![Cline Usage 2](./screenshots/cline-usage-2.png)
 *Cline generating the CLI commands structure*
 
 For full documentation on our Cline integration, see [CLINE_USAGE.md](docs/CLINE_USAGE.md).
@@ -588,13 +591,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-**Faizan SK** ([@SKfaizan-786](https://github.com/SKfaizan-786))
+**SK Faizanuddin** ([@SKfaizan-786](https://github.com/SKfaizan-786))
 - Backend Architecture & API Development
 - Kestra Orchestration & Workflow Design
 - CLI Development & Tooling
 - Infrastructure Setup & Docker Configuration
 
-**Haarish Hussain** ([@mdhaarishussain](https://github.com/mdhaarishussain))
+**Md Haaris Hussain** ([@mdhaarishussain](https://github.com/mdhaarishussain))
 - Frontend Dashboard Development
 - UI/UX Design & Visualization
 - Real-time Data Integration

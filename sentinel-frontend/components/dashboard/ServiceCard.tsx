@@ -34,37 +34,37 @@ const StatusDot = ({ status }: { status: Service["status"] }) => {
 
 export function ServiceCard({ service }: { service: Service }) {
     return (
-        <Spotlight className="p-5 bg-white/5 border-white/5 hover:border-primary/20 transition-all group">
+        <Spotlight className="p-5 bg-card border-border hover:border-primary/20 transition-all group">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-white/5 border border-white/5">
+                    <div className="p-2 rounded-lg bg-muted border border-border">
                         <ServiceIcon type={service.type} />
                     </div>
                     <div>
-                        <h4 className="font-semibold text-sm text-white">{service.name}</h4>
+                        <h4 className="font-semibold text-sm text-foreground">{service.name}</h4>
                         <div className="flex items-center gap-2 mt-1">
                             <StatusDot status={service.status} />
                             <span className="text-xs text-muted-foreground capitalize">{service.status}</span>
                         </div>
                     </div>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="p-2 rounded bg-white/5">
+                <div className="p-2 rounded bg-muted">
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Uptime</p>
-                    <p className="text-sm font-mono text-white">{service.uptime}%</p>
+                    <p className="text-sm font-mono text-foreground">{service.uptime}%</p>
                 </div>
-                <div className="p-2 rounded bg-white/5">
+                <div className="p-2 rounded bg-muted">
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Latency</p>
-                    <p className="text-sm font-mono text-white">{service.latency}ms</p>
+                    <p className="text-sm font-mono text-foreground">{service.latency}ms</p>
                 </div>
-                <div className="p-2 rounded bg-white/5">
+                <div className="p-2 rounded bg-muted">
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">CPU</p>
-                    <p className="text-sm font-mono text-white">{service.cpu}%</p>
+                    <p className="text-sm font-mono text-foreground">{service.cpu}%</p>
                 </div>
             </div>
 

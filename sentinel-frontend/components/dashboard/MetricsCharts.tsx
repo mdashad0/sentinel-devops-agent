@@ -62,15 +62,15 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-white">System Metrics</h3>
-                <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
+                <h3 className="text-xl font-semibold text-foreground">System Metrics</h3>
+                <div className="flex bg-muted rounded-lg p-1 border border-border">
                     {(["1h", "6h", "24h"] as const).map((range) => (
                         <button
                             key={range}
                             onClick={() => setTimeRange(range)}
                             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${timeRange === range
                                 ? "bg-primary/20 text-primary shadow-sm"
-                                : "text-muted-foreground hover:text-white"
+                                : "text-muted-foreground hover:text-foreground"
                                 }`}
                         >
                             {range}
@@ -80,12 +80,12 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
             </div>
 
             {/* Tabs */}
-            <div className="flex space-x-4 border-b border-white/10 pb-2">
+            <div className="flex space-x-4 border-b border-border pb-2">
                 <button
                     onClick={() => setActiveTab("response")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "response"
                         ? "border-primary text-primary"
-                        : "border-transparent text-muted-foreground hover:text-white"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                         }`}
                 >
                     Response Time (ms)
@@ -94,7 +94,7 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
                     onClick={() => setActiveTab("error")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "error"
                         ? "border-destructive text-destructive"
-                        : "border-transparent text-muted-foreground hover:text-white"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                         }`}
                 >
                     Error Rate (%)
@@ -103,7 +103,7 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
                     onClick={() => setActiveTab("resources")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "resources"
                         ? "border-secondary text-secondary-foreground"
-                        : "border-transparent text-muted-foreground hover:text-white"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                         }`}
                 >
                     CPU Usage (%)
@@ -111,26 +111,26 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
             </div>
 
             {/* Chart Container */}
-            <div className="h-[300px] w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 shadow-xl">
+            <div className="h-[300px] w-full bg-card backdrop-blur-sm border border-border rounded-xl p-4 shadow-xl">
                 <ResponsiveContainer width="100%" height="100%">
                     {activeTab === "resources" ? (
                         <LineChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                             <XAxis
                                 dataKey="timestamp"
-                                stroke="#64748b"
-                                tick={{ fill: "#64748b", fontSize: 12 }}
+                                stroke="var(--muted-foreground)"
+                                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
                                 tickLine={false}
                             />
                             <YAxis
-                                stroke="#64748b"
-                                tick={{ fill: "#64748b", fontSize: 12 }}
+                                stroke="var(--muted-foreground)"
+                                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
                                 tickLine={false}
                             />
                             <Tooltip
                                 shared={false}
-                                contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.1)", color: "#f1f5f9" }}
-                                itemStyle={{ color: "#f1f5f9" }}
+                                contentStyle={{ backgroundColor: "var(--popover)", borderColor: "var(--border)", color: "var(--popover-foreground)" }}
+                                itemStyle={{ color: "var(--popover-foreground)" }}
                             />
                             {serviceIds.map((id) => (
                                 <Line
@@ -146,12 +146,12 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
                         </LineChart>
                     ) : activeTab === "error" ? (
                         <LineChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                            <XAxis dataKey="timestamp" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} />
-                            <YAxis stroke="#64748b" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                            <XAxis dataKey="timestamp" stroke="var(--muted-foreground)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} tickLine={false} />
+                            <YAxis stroke="var(--muted-foreground)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} tickLine={false} />
                             <Tooltip
                                 shared={false}
-                                contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.1)", color: "#f1f5f9" }}
+                                contentStyle={{ backgroundColor: "var(--popover)", borderColor: "var(--border)", color: "var(--popover-foreground)" }}
                             />
                             {serviceIds.map((id) => (
                                 <Line
@@ -167,12 +167,12 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
                         </LineChart>
                     ) : (
                         <LineChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                            <XAxis dataKey="timestamp" stroke="#64748b" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} />
-                            <YAxis stroke="#64748b" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                            <XAxis dataKey="timestamp" stroke="var(--muted-foreground)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} tickLine={false} />
+                            <YAxis stroke="var(--muted-foreground)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} tickLine={false} />
                             <Tooltip
                                 shared={false}
-                                contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.1)", color: "#f1f5f9" }}
+                                contentStyle={{ backgroundColor: "var(--popover)", borderColor: "var(--border)", color: "var(--popover-foreground)" }}
                             />
                             {serviceIds.map((id) => (
                                 <Line

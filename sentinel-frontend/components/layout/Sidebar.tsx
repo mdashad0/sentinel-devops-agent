@@ -53,7 +53,7 @@ export function Sidebar() {
         <>
             {/* Logo Area */}
             <div className={cn(
-                "flex items-center h-16 px-6 border-b border-white/5",
+                "flex items-center h-16 px-6 border-b border-border",
                 collapsed && !isMobile ? "justify-center" : "justify-between"
             )}>
                 <Link href="/" className="flex items-center gap-3 overflow-hidden">
@@ -71,7 +71,7 @@ export function Sidebar() {
                 {isMobile && (
                     <button
                         onClick={() => setMobileOpen(false)}
-                        className="p-2 rounded-lg hover:bg-white/10 text-muted-foreground"
+                        className="p-2 rounded-lg hover:bg-accent text-muted-foreground"
                     >
                         <X className="h-5 w-5" />
                     </button>
@@ -90,7 +90,7 @@ export function Sidebar() {
                                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative overflow-hidden",
                                 isActive
                                     ? "bg-primary/10 text-primary"
-                                    : "text-muted-foreground hover:text-white hover:bg-white/5"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
                             )}
                         >
                             {isActive && (
@@ -101,7 +101,7 @@ export function Sidebar() {
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 />
                             )}
-                            <item.icon className={cn("h-5 w-5 shrink-0 relative z-10", isActive ? "text-primary" : "group-hover:text-white")} />
+                            <item.icon className={cn("h-5 w-5 shrink-0 relative z-10", isActive ? "text-primary" : "group-hover:text-foreground")} />
                             {(!collapsed || isMobile) && (
                                 <span className="font-medium truncate relative z-10">{item.name}</span>
                             )}
@@ -112,10 +112,10 @@ export function Sidebar() {
 
             {/* Footer / Collapse Toggle (desktop only) */}
             {!isMobile && (
-                <div className="p-4 border-t border-white/5">
+                <div className="p-4 border-t border-border">
                     <button
                         onClick={() => setCollapsed(!collapsed)}
-                        className="flex items-center justify-center w-full p-2 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors"
+                        className="flex items-center justify-center w-full p-2 rounded-lg hover:bg-accent text-muted-foreground transition-colors"
                     >
                         {collapsed ? (
                             <ChevronRight className="h-5 w-5" />
@@ -136,7 +136,7 @@ export function Sidebar() {
             {/* Mobile Menu Button */}
             <button
                 onClick={() => setMobileOpen(true)}
-                className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-white/10 text-white"
+                className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border text-foreground"
                 aria-label="Open menu"
             >
                 <Menu className="h-6 w-6" />
@@ -160,7 +160,7 @@ export function Sidebar() {
                             animate={{ x: 0 }}
                             exit={{ x: -280 }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed left-0 top-0 bottom-0 z-50 w-[280px] flex flex-col glass border-r border-white/10 lg:hidden"
+                            className="fixed left-0 top-0 bottom-0 z-50 w-[280px] flex flex-col glass border-r border-border lg:hidden"
                         >
                             <SidebarContent isMobile />
                         </motion.aside>
@@ -172,7 +172,7 @@ export function Sidebar() {
             <motion.aside
                 initial={false}
                 animate={{ width: collapsed ? 80 : 280 }}
-                className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col glass border-r border-white/10 transition-all duration-300"
+                className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col glass border-r border-border transition-all duration-300"
             >
                 <SidebarContent />
             </motion.aside>

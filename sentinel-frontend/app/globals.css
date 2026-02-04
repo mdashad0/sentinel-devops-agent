@@ -49,12 +49,47 @@
     --radius: 0.625rem;
 }
 
+:root.light {
+    --background: #f5f5f5;
+    --foreground: #1a1a1a;
+    --card: rgba(0, 0, 0, 0.03);
+    --card-foreground: #1a1a1a;
+    --popover: #ffffff;
+    --popover-foreground: #1a1a1a;
+    --primary: #667eea;
+    --primary-foreground: #ffffff;
+    --secondary: #e2e8f0;
+    --secondary-foreground: #1a1a1a;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --accent: #667eea;
+    --accent-foreground: #ffffff;
+    --destructive: #ef4444;
+    --border: rgba(0, 0, 0, 0.1);
+    --input: rgba(0, 0, 0, 0.1);
+    --ring: #667eea;
+    --sidebar: #f5f5f5;
+    --sidebar-foreground: #1a1a1a;
+    --sidebar-primary: #667eea;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e2e8f0;
+    --sidebar-accent-foreground: #1a1a1a;
+    --sidebar-border: rgba(0, 0, 0, 0.1);
+    --sidebar-ring: #667eea;
+}
+
 @layer base {
     body {
         background-color: var(--background);
         color: var(--foreground);
         font-family: var(--font-sans);
         -webkit-font-smoothing: antialiased;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    * {
+        transition-property: background-color, border-color, color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
     }
 }
 

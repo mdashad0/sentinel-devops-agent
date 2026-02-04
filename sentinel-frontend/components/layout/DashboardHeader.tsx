@@ -4,6 +4,7 @@ import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { NotificationsModal } from "@/components/common/NotificationsModal";
 import { ProfileDropdown } from "@/components/common/ProfileDropdown";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useState } from "react";
 
 export function DashboardHeader() {
@@ -11,7 +12,7 @@ export function DashboardHeader() {
     const [profileOpen, setProfileOpen] = useState(false);
 
     return (
-        <header className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-white/5 bg-background/50 backdrop-blur-md sticky top-0 z-30">
+        <header className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-border bg-background/50 backdrop-blur-md sticky top-0 z-30">
             {/* Search - Hidden on mobile, visible on tablet+ */}
             <div className="hidden md:flex items-center gap-4 w-full max-w-md">
                 <div className="relative w-full">
@@ -20,7 +21,7 @@ export function DashboardHeader() {
                         type="text"
                         placeholder="Search services, incidents, logs..."
                         aria-label="Search services, incidents, logs"
-                        className="w-full bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
+                        className="w-full bg-muted border border-border rounded-full py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
                     />
                 </div>
             </div>
@@ -29,10 +30,11 @@ export function DashboardHeader() {
             <div className="md:hidden flex-1 pl-12" />
 
             <div className="flex items-center gap-4 relative">
+                <ThemeToggle />
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="relative text-muted-foreground hover:text-white"
+                    className="relative text-muted-foreground hover:text-foreground"
                     onClick={() => setNotificationsOpen(true)}
                 >
                     <Bell className="h-5 w-5" />
@@ -42,7 +44,7 @@ export function DashboardHeader() {
 
                 <button
                     onClick={() => setProfileOpen(!profileOpen)}
-                    className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center ring-2 ring-white/10 hover:ring-primary/50 transition-all"
+                    className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center ring-2 ring-border hover:ring-primary/50 transition-all"
                 >
                     <User className="h-4 w-4 text-white" />
                 </button>

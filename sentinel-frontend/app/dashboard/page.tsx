@@ -56,7 +56,7 @@ export default function DashboardPage() {
     return (
         <div className="space-y-8 pb-20">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2 text-white">Dashboard</h1>
+                <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">Dashboard</h1>
                 <p className="text-muted-foreground">Real-time overview of your system health and agent activities.</p>
             </div>
 
@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
                     <div>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-white">Monitored Services</h2>
+                            <h2 className="text-xl font-semibold text-foreground">Monitored Services</h2>
                             <span className="text-sm text-muted-foreground flex items-center gap-2">
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -97,7 +97,7 @@ export default function DashboardPage() {
                                 <h2 className="text-lg font-semibold text-primary">Sentinel AI Analysis</h2>
                                 <button
                                     onClick={() => setActiveIncidentId(null)}
-                                    className="text-xs text-muted-foreground hover:text-white"
+                                    className="text-xs text-muted-foreground hover:text-foreground"
                                 >
                                     Close
                                 </button>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
                     )}
 
                     <div>
-                        <h2 className="text-xl font-semibold text-white mb-4">Incident Timeline</h2>
+                        <h2 className="text-xl font-semibold text-foreground mb-4">Incident Timeline</h2>
                         <IncidentTimeline
                             incidents={incidents}
                             onViewReasoning={(id) => setActiveIncidentId(id)}

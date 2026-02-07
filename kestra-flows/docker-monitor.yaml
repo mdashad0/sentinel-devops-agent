@@ -1,0 +1,20 @@
+id: docker-container-monitor
+namespace: sentinel.devops
+
+tasks:
+  - id: get-containers
+    type: io.kestra.plugin.core.http.Request
+    uri: http://host.docker.internal:4000/api/docker/containers
+
+  - id: check-unhealthy
+    type: io.kestra.plugin.core.flow.EachParallel
+    value: "{{ outputs['get-containers'].body.containers }}"
+    tasks:
+      - id: check-health
+        type: io.kestra.plugin.core.flow.If
+        condition: "{{ taskrun.value.health == 'unhealthy' }}"
+        then:
+          - id: try-restart-container
+            type: io.kestra.plugin.core.http.Request
+            uri: "http://host.docker.internal:4000/api/docker/try-restart/{{ taskrun.value.id }}"
+            method: POST

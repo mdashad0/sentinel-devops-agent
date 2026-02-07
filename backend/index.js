@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const { listContainers, getContainerHealth } = require('./docker/client');
+const monitor = require('./docker/monitor');
+const healer = require('./docker/healer');
 
 const app = express();
 const PORT = 4000;
@@ -25,14 +28,18 @@ let activityLog = [];
 let aiLogs = [];
 
 // Service configuration
-// Using localhost for local execution
 const services = [
   { name: 'auth', url: 'http://localhost:3001/health' },
   { name: 'payment', url: 'http://localhost:3002/health' },
   { name: 'notification', url: 'http://localhost:3003/health' }
 ];
 
-// Continuous health checking (every 5 seconds)
+// Smart Restart Tracking
+const restartTracker = new Map(); // containerId -> { attempts: number, lastAttempt: number }
+const MAX_RESTARTS = 3;
+const GRACE_PERIOD_MS = 60 * 1000; // 1 minute
+
+// Continuous health checking
 async function checkServiceHealth() {
   console.log('🔍 Checking service health...');
 
@@ -55,34 +62,13 @@ async function checkServiceHealth() {
         code: code,
         lastUpdated: new Date()
       };
-
-      // Log the failure (both critical and degraded)
-      const lastLog = activityLog[0];
-      const statusText = code >= 500 ? 'DOWN' : 'DEGRADED';
-      const isDuplicate = lastLog && 
-        lastLog.message.includes(service.name.toUpperCase()) && 
-        lastLog.message.includes(statusText);
-
-      if (!isDuplicate) {
-        activityLog.unshift({
-          id: Date.now(),
-          message: code >= 500 
-            ? `${service.name.toUpperCase()} service is DOWN (HTTP ${code})`
-            : `${service.name.toUpperCase()} service is DEGRADED (HTTP ${code})`,
-          type: 'alert',
-          severity: code >= 500 ? 'critical' : 'warning',
-          timestamp: new Date()
-        });
-        if (activityLog.length > 50) activityLog.splice(50);
-      }
     }
   }
   systemStatus.lastUpdated = new Date();
 }
 
-// Start continuous health monitoring
 setInterval(checkServiceHealth, 5000);
-checkServiceHealth(); // Initial check
+checkServiceHealth();
 
 // --- ENDPOINTS FOR FRONTEND ---
 
@@ -98,18 +84,13 @@ app.get('/api/insights', (req, res) => {
   res.json({ insights: aiLogs.slice(0, 20) });
 });
 
-// --- WEBHOOK FOR KESTRA ---
-
 app.post('/api/kestra-webhook', (req, res) => {
   const { aiReport, metrics } = req.body;
-  console.log('📦 Received update from Kestra:', aiReport);
-
   if (aiReport) {
     systemStatus.aiAnalysis = aiReport;
   }
   systemStatus.lastUpdated = new Date();
 
-  // Parse Metrics Update
   if (metrics) {
     Object.keys(metrics).forEach(serviceName => {
       if (systemStatus.services[serviceName]) {
@@ -122,41 +103,6 @@ app.post('/api/kestra-webhook', (req, res) => {
       }
     });
   }
-
-  aiLogs.unshift({
-    id: Date.now(),
-    analysis: aiReport,
-    metrics: metrics,
-    summary: aiReport,
-    timestamp: new Date()
-  });
-  if (aiLogs.length > 20) aiLogs.splice(20);
-
-  if (aiReport && !aiReport.includes("HEALTHY")) {
-    activityLog.unshift({
-      id: Date.now(),
-      message: aiReport,
-      type: 'alert',
-      severity: aiReport.includes('CRITICAL') ? 'critical' : 'warning',
-      timestamp: new Date()
-    });
-    if (activityLog.length > 50) activityLog.splice(50);
-  }
-
-  res.json({ success: true });
-});
-
-app.post('/api/kestra/events', (req, res) => {
-  const { services, ai, timestamp } = req.body;
-  console.log('📊 Kestra event received:', ai);
-  activityLog.unshift({
-    id: Date.now(),
-    message: `Kestra Analysis: ${ai}`,
-    type: 'info',
-    severity: 'info',
-    timestamp: new Date(timestamp || Date.now())
-  });
-  if (activityLog.length > 50) activityLog.splice(50);
   res.json({ success: true });
 });
 
@@ -169,28 +115,128 @@ app.post('/api/action/:service/:type', async (req, res) => {
 
   try {
     let mode = 'healthy';
-    if (type === 'restart' || type === 'heal') mode = 'healthy';
     if (type === 'crash' || type === 'down') mode = 'down';
     if (type === 'degraded') mode = 'degraded';
     if (type === 'slow') mode = 'slow';
 
     await axios.post(`http://localhost:${port}/simulate/${mode}`, {}, { timeout: 5000 });
-
-    activityLog.unshift({
-      id: Date.now(),
-      message: `Manual action: ${type} executed on ${service} service`,
-      type: 'action',
-      severity: 'info',
-      timestamp: new Date()
-    });
-
     res.json({ success: true, message: `${type} executed on ${service}` });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
+// --- DOCKER ENDPOINTS ---
+
+// Middleware for ID/Service validation and Auth (mock auth)
+const requireAuth = (req, res, next) => {
+  // In a real app, check 'Authorization' header
+  // For now, assume authenticated if internal or trusted
+  next();
+};
+
+const validateId = (req, res, next) => {
+  if (!req.params.id || typeof req.params.id !== 'string' || req.params.id.length < 1) {
+    return res.status(400).json({ error: 'Invalid ID provided' });
+  }
+  next();
+};
+
+const validateScaleParams = (req, res, next) => {
+  const replicas = parseInt(req.params.replicas, 10);
+  if (!req.params.service || isNaN(replicas) || replicas < 0 || replicas > 100) {
+    return res.status(400).json({ error: 'Invalid scale parameters' });
+  }
+  next();
+};
+
+app.get('/api/docker/containers', async (req, res) => {
+  try {
+    const containers = await listContainers();
+    // Use Promise.allSettled to handle monitoring setup concurrently without crashing
+    await Promise.allSettled(containers.map(c => monitor.startMonitoring(c.id)));
+
+    // Enrich with smart restart meta
+    const enrichedContainers = containers.map(c => {
+      const tracker = restartTracker.get(c.id) || { attempts: 0, lastAttempt: 0 };
+      return {
+        ...c,
+        metrics: monitor.getMetrics(c.id), // Include current metrics snapshot
+        restartCount: tracker.attempts,
+        lastRestart: tracker.lastAttempt
+      };
+    });
+
+    res.json({ containers: enrichedContainers });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/docker/health/:id', validateId, async (req, res) => {
+  try {
+    const health = await getContainerHealth(req.params.id);
+    res.json(health);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/docker/metrics/:id', validateId, (req, res) => {
+  const metrics = monitor.getMetrics(req.params.id);
+  res.json(metrics || { error: 'No metrics available' });
+});
+
+app.post('/api/docker/try-restart/:id', requireAuth, validateId, async (req, res) => {
+  const id = req.params.id;
+  const now = Date.now();
+  let tracker = restartTracker.get(id) || { attempts: 0, lastAttempt: 0 };
+
+  // Reset attempts if outside grace period
+  if (now - tracker.lastAttempt > GRACE_PERIOD_MS) {
+    tracker.attempts = 0;
+  }
+
+  if (tracker.attempts >= MAX_RESTARTS) {
+    return res.status(429).json({
+      allowed: false,
+      reason: 'Max restart attempts exceeded',
+      nextRetry: new Date(tracker.lastAttempt + GRACE_PERIOD_MS)
+    });
+  }
+
+  tracker.attempts++;
+  tracker.lastAttempt = now;
+  restartTracker.set(id, tracker);
+
+  const result = await healer.restartContainer(id);
+  res.json({ allowed: true, ...result });
+});
+
+app.post('/api/docker/restart/:id', requireAuth, validateId, async (req, res) => {
+  // Manual override bypasses smart checks, or update tracker manually
+  const id = req.params.id;
+  // Update tracker so manual restarts count towards limits or reset headers? 
+  // For manual, we usually want to force it. We won't incr limits but update 'lastAttempt' timestamp
+  const now = Date.now();
+  let tracker = restartTracker.get(id) || { attempts: 0, lastAttempt: 0 };
+  tracker.lastAttempt = now;
+  restartTracker.set(id, tracker);
+
+  const result = await healer.restartContainer(id);
+  res.json(result);
+});
+
+app.post('/api/docker/recreate/:id', requireAuth, validateId, async (req, res) => {
+  const result = await healer.recreateContainer(req.params.id);
+  res.json(result);
+});
+
+app.post('/api/docker/scale/:service/:replicas', requireAuth, validateScaleParams, async (req, res) => {
+  const result = await healer.scaleService(req.params.service, req.params.replicas);
+  res.json(result);
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Sentinel Backend running on http://0.0.0.0:${PORT}`);
-  console.log(`🔍 Continuous health monitoring active (5s intervals)`);
 });

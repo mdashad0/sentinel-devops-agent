@@ -21,6 +21,7 @@ export function DashboardHeader() {
                         type="text"
                         placeholder="Search services, incidents, logs..."
                         aria-label="Search services, incidents, logs"
+                        data-search
                         className="w-full bg-muted border border-border rounded-full py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/50"
                     />
                 </div>

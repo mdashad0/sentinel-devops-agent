@@ -30,7 +30,7 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
     // Helper to get color for service
     const getServiceColor = (id: string) => {
         // If service is down, line becomes RED
-        if (metrics[id]?.currentErrorRate > 0.5) return "#ef4444";
+        if (metrics[id] && metrics[id].currentErrorRate > 0.5) return "#ef4444";
 
         switch (id) {
             case "api-gateway": return "#22d3ee"; // Cyan
@@ -182,7 +182,7 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
                                     name={metrics[id].name}
                                     stroke={getServiceColor(id)}
                                     // Make line thicker if down
-                                    strokeWidth={metrics[id]?.currentErrorRate > 0.5 ? 4 : 2}
+                                    strokeWidth={(metrics[id] && metrics[id].currentErrorRate > 0.5) ? 4 : 2}
                                     dot={false}
                                     activeDot={{ r: 6, strokeWidth: 0 }}
                                 />
@@ -195,8 +195,10 @@ export function MetricsCharts({ metrics }: MetricsChartsProps) {
             {/* Custom Legend for better control */}
             <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
                 {serviceIds.map(id => {
-                    const isDown = metrics[id]?.currentErrorRate > 0.5;
+                    const isDown = metrics[id] && metrics[id].currentErrorRate > 0.5;
                     const color = getServiceColor(id);
+                    // Guard against missing metrics in legend
+                    if (!metrics[id]) return null;
                     return (
                         <div key={id} className="flex items-center gap-2">
                             <span

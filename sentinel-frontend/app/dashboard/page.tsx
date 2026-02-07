@@ -8,11 +8,15 @@ import { AgentReasoningPanel } from "@/components/dashboard/AgentReasoningPanel"
 import { mockServices } from "@/lib/mockData";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useIncidents } from "@/hooks/useIncidents";
+
+import { useContainers } from "@/hooks/useContainers";
+import { ContainerCard } from "@/components/dashboard/ContainerCard";
 import { useMemo } from "react";
 
 export default function DashboardPage() {
     const { metrics } = useMetrics();
     const { incidents, activeIncidentId, setActiveIncidentId } = useIncidents();
+    const { containers, restartContainer } = useContainers();
     const liveServices = useMemo(() => {
         return mockServices.map(service => {
             const realTime = metrics[service.id];
@@ -83,6 +87,29 @@ export default function DashboardPage() {
                         </div>
                         <ServiceGrid services={liveServices} />
                     </div>
+
+                    {/* Docker Containers Section */}
+                    {containers.length > 0 && (
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-semibold text-foreground">Docker Containers</h2>
+                                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">
+                                        {containers.length} Running
+                                    </span>
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {containers.map(container => (
+                                    <ContainerCard
+                                        key={container.id}
+                                        container={container}
+                                        onRestart={restartContainer}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Column: Timeline & Reasoning (1/3 width) */}

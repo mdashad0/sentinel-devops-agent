@@ -1,3 +1,5 @@
+'use client';
+
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 
@@ -6,6 +8,8 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
+
+
     return (
         <div className="min-h-screen bg-background text-foreground flex">
             <Sidebar />
@@ -15,6 +19,7 @@ export default function DashboardLayout({
                     {children}
                 </main>
             </div>
+
         </div>
     );
 }

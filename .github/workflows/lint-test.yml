@@ -89,7 +89,7 @@ jobs:
     
     - name: Build services
       run: |
-        docker-compose build --no-cache
+        docker compose build --no-cache
 
   security-scan:
     runs-on: ubuntu-latest

@@ -8,7 +8,7 @@ import { AgentReasoningPanel } from "@/components/dashboard/AgentReasoningPanel"
 import { mockServices } from "@/lib/mockData";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useIncidents } from "@/hooks/useIncidents";
-import { useEffect, useState } from "react";
+
 import { useContainers } from "@/hooks/useContainers";
 import { ContainerCard } from "@/components/dashboard/ContainerCard";
 import { useMemo } from "react";
@@ -17,11 +17,6 @@ export default function DashboardPage() {
     const { metrics } = useMetrics();
     const { incidents, activeIncidentId, setActiveIncidentId } = useIncidents();
     const { containers, restartContainer } = useContainers();
-    const [liveServices, setLiveServices] = useState(mockServices);
-
-    // Merge real-time metrics into services
-    useEffect(() => {
-        setLiveServices(prev => prev.map(service => {
     const liveServices = useMemo(() => {
         return mockServices.map(service => {
             const realTime = metrics[service.id];

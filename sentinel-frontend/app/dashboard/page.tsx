@@ -7,20 +7,19 @@ import { IncidentTimeline } from "@/components/dashboard/IncidentTimeline";
 import { AgentReasoningPanel } from "@/components/dashboard/AgentReasoningPanel";
 import { mockServices } from "@/lib/mockData";
 import { useMetrics } from "@/hooks/useMetrics";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useIncidents } from "@/hooks/useIncidents";
 
 import { useContainers } from "@/hooks/useContainers";
 import { ContainerCard } from "@/components/dashboard/ContainerCard";
-import { useMemo, useState, useEffect } from "react";
-
-// Skeleton imports
-import { ServiceGridSkeleton } from "@/components/dashboard/ServiceCardSkeleton";
-import { MetricsChartsSkeleton } from "@/components/dashboard/ChartSkeleton";
-import { IncidentTimelineSkeleton } from "@/components/dashboard/IncidentTimelineSkeleton";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/common/Skeleton";
+import { MetricsChartsSkeleton } from "@/components/dashboard/ChartSkeleton";
+import { ServiceGridSkeleton } from "@/components/dashboard/ServiceCardSkeleton";
+import { IncidentTimelineSkeleton } from "@/components/dashboard/IncidentTimelineSkeleton";
 
 export default function DashboardPage() {
-    const { metrics, status: metricsStatus } = useMetrics();
+    const { metrics } = useMetrics();
     const { incidents, activeIncidentId, setActiveIncidentId } = useIncidents();
     const { containers, loading: containersLoading, restartContainer } = useContainers();
 
@@ -29,12 +28,16 @@ export default function DashboardPage() {
 
     useEffect(() => {
         // Clear initial load after first data arrives
-        if (metricsStatus === "connected" && initialLoad) {
-            // Small delay to prevent flash
-            const timer = setTimeout(() => setInitialLoad(false), 300);
+        if ((metrics || incidents.length > 0) && initialLoad) {
+            const timer = setTimeout(() => setInitialLoad(false), 0);
             return () => clearTimeout(timer);
         }
-    }, [metricsStatus, initialLoad]);
+
+        // Request notification permission if we have an active incident
+        if (activeIncidentId && "Notification" in window && Notification.permission === "default") {
+             void Notification.requestPermission();
+        }
+    }, [metrics, incidents, initialLoad, activeIncidentId]);
 
     const isLoading = initialLoad;
 
@@ -59,7 +62,7 @@ export default function DashboardPage() {
                     ...service,
                     latency: realTime.currentResponseTime,
                     cpu: realTime.currentCpu,
-                    uptime: currentUptime.toFixed(2) as any,
+                    uptime: Number(currentUptime.toFixed(2)),
                     status: (isDown ? "down" : (realTime.currentErrorRate > 0.2 ? "degraded" : "healthy")) as "down" | "degraded" | "healthy",
                     trend: newTrend.length > 0 ? newTrend : baseService.trend,
                 };
@@ -67,6 +70,32 @@ export default function DashboardPage() {
             return service;
         });
     }, [metrics]);
+
+    const { addNotification } = useNotifications();
+    const prevStatuses = useRef<Record<string, string>>({});
+
+    useEffect(() => {
+        liveServices.forEach(service => {
+            const prevStatus = prevStatuses.current[service.id];
+            const currentStatus = service.status;
+
+            if (prevStatus && prevStatus !== "down" && currentStatus === "down") {
+                addNotification({
+                    type: "incident",
+                    title: `Service Down: ${service.name}`,
+                    message: `${service.name} is not responding as of ${new Date().toLocaleTimeString()}`,
+                });
+            } else if (prevStatus === "down" && currentStatus !== "down") {
+                addNotification({
+                    type: "resolved",
+                    title: `Service Restored: ${service.name}`,
+                    message: `${service.name} is back online and healthy.`,
+                });
+            }
+            
+            prevStatuses.current[service.id] = currentStatus;
+        });
+    }, [liveServices, addNotification]);
 
     const activeIncident = incidents.find(i => i.id === activeIncidentId);
 

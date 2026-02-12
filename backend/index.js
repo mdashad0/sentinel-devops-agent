@@ -126,7 +126,8 @@ app.post('/api/kestra-webhook', (req, res) => {
           code >= 500 ? 'critical' : 'degraded';
 
         if (systemStatus.services[serviceName].status !== newStatus) {
-          logActivity(newStatus === 'healthy' ? 'success' : 'alert', `Metric update: ${serviceName} is now ${newStatus}`);
+          const severity = newStatus === 'healthy' ? 'success' : (newStatus === 'critical' ? 'alert' : 'warn');
+          logActivity(severity, `Metric update: ${serviceName} is now ${newStatus}`);
         }
 
         systemStatus.services[serviceName].status = newStatus;

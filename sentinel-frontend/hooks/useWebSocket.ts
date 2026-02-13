@@ -14,9 +14,22 @@ export function useWebSocket({ onMessage, reconnectInterval = 3000, enabled = tr
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | number | undefined>(undefined);
+  const isMountedRef = useRef(true);
+
+  // Keep onMessage stable
+  const onMessageRef = useRef(onMessage);
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
 
   const connect = useCallback(() => {
     if (!enabled) return;
+
+    // Clear any pending reconnects
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = undefined;
+    }
 
     // Close existing connection if any
     if (wsRef.current) {
@@ -26,45 +39,67 @@ export function useWebSocket({ onMessage, reconnectInterval = 3000, enabled = tr
     const ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
+      if (!isMountedRef.current) {
+        ws.close();
+        return;
+      }
       setIsConnected(true);
       console.log('🔌 WebSocket connected');
     };
 
     ws.onmessage = (event) => {
+      if (!isMountedRef.current) return;
       try {
         const data = JSON.parse(event.data);
         setLastMessage(data);
-        onMessage?.(data);
+        onMessageRef.current?.(data);
       } catch (e) {
         console.error("Failed to parse WebSocket message:", e);
       }
     };
 
     ws.onclose = () => {
+      if (!isMountedRef.current) return;
       setIsConnected(false);
-      // Reconnect with backoff
-      reconnectTimeoutRef.current = setTimeout(() => {
-        console.log('🔄 Reconnecting WebSocket...');
-        connect();
-      }, reconnectInterval);
+
+      // Only reconnect if this is still the active socket
+      if (wsRef.current === ws) {
+        reconnectTimeoutRef.current = setTimeout(() => {
+          if (isMountedRef.current) {
+            console.log('🔄 Reconnecting WebSocket...');
+            connect();
+          }
+        }, reconnectInterval);
+      }
     };
 
     ws.onerror = (error) => {
+      if (!isMountedRef.current) return;
       console.error("WebSocket error:", error);
-      ws.close();
+      // ws.close() will be called, triggering onclose
     };
 
     wsRef.current = ws;
-  }, [onMessage, reconnectInterval, enabled]);
+  }, [reconnectInterval, enabled]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     connect();
     return () => {
+      isMountedRef.current = false;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
       wsRef.current?.close();
-      clearTimeout(reconnectTimeoutRef.current);
     };
   }, [connect]);
 
-  return { isConnected, lastMessage };
+  const sendMessage = useCallback((msg: any) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(msg));
+    }
+  }, []);
+
+  return { isConnected, lastMessage, sendMessage };
 }
 

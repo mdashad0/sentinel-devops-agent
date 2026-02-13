@@ -50,7 +50,7 @@ function IncidentsContent() {
     const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
     const [pageSize, setPageSize] = useState(Number(searchParams.get("pageSize")) || 10);
 
-    const { incidents, isLoading, totalCount, allServices } = useIncidentHistory({
+    const { incidents, isLoading, totalCount, totalActive, totalCritical, allServices } = useIncidentHistory({
         filters,
         search,
         sort: sortConfig,
@@ -106,9 +106,6 @@ function IncidentsContent() {
         setPage(1);
     }, []);
 
-    // Stats calculations
-    const activeIncidents = incidents.filter((i) => i.status !== "resolved").length;
-    const criticalCount = incidents.filter((i) => i.severity === "critical").length;
     const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
@@ -138,14 +135,14 @@ function IncidentsContent() {
                         <Activity className="h-4 w-4" />
                         <span className="text-xs uppercase tracking-wider font-semibold">Active</span>
                     </div>
-                    <div className="text-2xl font-bold text-yellow-400">{activeIncidents}</div>
+                    <div className="text-2xl font-bold text-yellow-400">{totalActive}</div>
                 </div>
                 <div className="p-4 bg-white/5 border border-white/5 rounded-xl">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">
                         <FileWarning className="h-4 w-4" />
                         <span className="text-xs uppercase tracking-wider font-semibold">Critical</span>
                     </div>
-                    <div className="text-2xl font-bold text-red-400">{criticalCount}</div>
+                    <div className="text-2xl font-bold text-red-400">{totalCritical}</div>
                 </div>
                 <div className="p-4 bg-white/5 border border-white/5 rounded-xl">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">

@@ -2,31 +2,45 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Incident } from "@/lib/mockData";
-import { useWebSocket } from "./useWebSocket";
-import { WebSocketMessage } from "../lib/websocket";
+import { useWebSocketContext } from "../lib/WebSocketContext";
+
+interface AiAnalysisData {
+    summary: string;
+    choices?: { message: { content: string } }[];
+}
+
+interface InsightPayload {
+    id?: string | number;
+    analysis?: string;
+    summary?: string;
+    timestamp?: string;
+    [key: string]: unknown;
+}
 
 export function useIncidents() {
     const [incidents, setIncidents] = useState<Incident[]>([]);
     const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
+    const { isConnected, lastMessage } = useWebSocketContext();
 
-    const processInsight = useCallback((insight: any) => {
+    const processInsight = useCallback((insight: InsightPayload) => {
         if (!insight) return;
 
         // Parse AI analysis
-        let aiData: any = {};
+        let aiData: AiAnalysisData = { summary: "" };
         const rawAnalysis = insight.analysis || insight.summary || "";
 
         try {
             if (typeof rawAnalysis === 'string' && rawAnalysis.trim().startsWith('{')) {
-                aiData = JSON.parse(rawAnalysis);
-                if (aiData.choices?.[0]?.message?.content) {
-                    aiData.summary = aiData.choices[0].message.content;
+                const parsed = JSON.parse(rawAnalysis);
+                aiData = parsed;
+                if (parsed.choices?.[0]?.message?.content) {
+                    aiData.summary = parsed.choices[0].message.content;
                 }
             } else {
-                aiData = { summary: rawAnalysis };
+                aiData = { summary: String(rawAnalysis) };
             }
         } catch {
-            aiData = { summary: rawAnalysis };
+            aiData = { summary: String(rawAnalysis) };
         }
 
         const summaryUpper = (aiData.summary || "").toUpperCase();
@@ -59,37 +73,42 @@ export function useIncidents() {
             agentAction: "Monitoring",
             agentPredictionConfidence: 99,
             timeline: [],
-            reasoning: aiData.summary || rawAnalysis || "No analysis available"
+            reasoning: aiData.summary || String(rawAnalysis) || "No analysis available"
         };
 
-        setIncidents([incident]);
+        setIncidents(prev => {
+            // Prevent duplicates
+            if (prev.some(i => i.id === incident.id)) return prev;
+            return [incident, ...prev];
+        });
 
         // Auto-open panel only if critical/degraded
         if (status === 'failed') {
             setActiveIncidentId(incident.id);
         }
-    }, [activeIncidentId]); // activeIncidentId dependency to avoid re-opening if user closed it? Actually logic above ignores it, checking activeIncidentId inside might be better or remove dependency if always open recent. Logic in original was `if (!activeIncidentId && status === 'failed')`.
+    }, []);
 
-    const handleMessage = useCallback((message: WebSocketMessage) => {
-        if (message.type === 'INCIDENT_NEW') {
-            processInsight(message.data);
-        } else if (message.type === 'INIT' && message.data.aiAnalysis) {
-            // Reconstruct insight from initial state if needed, or fetch latest
-            // For now, let's just trigger a fetch for the latest incase to be safe, or allow INIT to carry it
+    // Handle WebSocket Messages
+    useEffect(() => {
+        if (!lastMessage) return;
+
+        if (lastMessage.type === 'INCIDENT_NEW') {
+            processInsight(lastMessage.data);
+        } else if (lastMessage.type === 'INIT' && lastMessage.data.aiAnalysis) {
+            // Optional: Handle INIT data if structural match found
         }
-    }, [processInsight]);
-
-    const { isConnected } = useWebSocket({
-        onMessage: handleMessage
-    });
+    }, [lastMessage, processInsight]);
 
     // Initial Fetch
     useEffect(() => {
-        fetch("http://localhost:4000/api/insights")
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        fetch(`${apiUrl}/insights`)
             .then(res => res.json())
             .then(data => {
-                if (data.insights && Array.isArray(data.insights) && data.insights.length > 0) {
-                    processInsight(data.insights[0]);
+                if (data.insights && Array.isArray(data.insights)) {
+                    data.insights.forEach((insight: InsightPayload) => {
+                        processInsight(insight);
+                    });
                 }
             })
             .catch(e => console.error("Failed to fetch incidents:", e));

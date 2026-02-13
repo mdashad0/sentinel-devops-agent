@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useWebSocket } from "./useWebSocket";
+import { useWebSocketContext } from "../lib/WebSocketContext";
 import { WebSocketMessage } from "../lib/websocket";
 
 export type TimeSeriesPoint = {
@@ -38,24 +38,24 @@ export function useMetrics() {
         "api-gateway": { id: "api-gateway", name: "API Gateway", currentResponseTime: 15, currentErrorRate: 0, currentCpu: 12, history: initialHistory },
     });
 
+    const { isConnected, lastMessage } = useWebSocketContext();
     const [remoteStatus, setRemoteStatus] = useState<any>({});
 
-    const handleMessage = useCallback((message: WebSocketMessage) => {
-        if (message.type === 'METRICS' || message.type === 'INIT') {
-            if (message.data.services) {
-                setRemoteStatus(message.data.services);
+    // Listen for WebSocket messages from Context
+    useEffect(() => {
+        if (!lastMessage) return;
+
+        if (lastMessage.type === 'METRICS' || lastMessage.type === 'INIT') {
+            if (lastMessage.data.services) {
+                setRemoteStatus(lastMessage.data.services);
             }
-        } else if (message.type === 'SERVICE_UPDATE') {
+        } else if (lastMessage.type === 'SERVICE_UPDATE') {
             setRemoteStatus((prev: any) => ({
                 ...prev,
-                [message.data.name]: message.data
+                [lastMessage.data.name]: lastMessage.data
             }));
         }
-    }, []);
-
-    const { isConnected } = useWebSocket({
-        onMessage: handleMessage
-    });
+    }, [lastMessage]);
 
     // Update metrics loop (visuals + incorporating remote status)
     useEffect(() => {
@@ -130,7 +130,8 @@ export function useMetrics() {
 
     // Initial Fetch fallback
     useEffect(() => {
-        fetch("http://localhost:4000/api/status")
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        fetch(`${apiUrl}/status`)
             .then(res => res.json())
             .then(data => {
                 if (data.services) setRemoteStatus(data.services);

@@ -27,6 +27,8 @@ interface UseIncidentHistoryResult {
     incidents: Incident[];
     isLoading: boolean;
     totalCount: number;
+    totalActive: number;
+    totalCritical: number;
     allServices: string[];
 }
 
@@ -222,10 +224,16 @@ export function useIncidentHistory({
         return sortedIncidents.slice(startIndex, startIndex + pageSize);
     }, [sortedIncidents, page, pageSize]);
 
+    // Calculate aggregates from full dataset
+    const totalActive = useMemo(() => incidents.filter((i) => i.status !== "resolved").length, [incidents]);
+    const totalCritical = useMemo(() => incidents.filter((i) => i.severity === "critical").length, [incidents]);
+
     return {
         incidents: paginatedIncidents,
         isLoading,
         totalCount: sortedIncidents.length,
+        totalActive,
+        totalCritical,
         allServices,
     };
 }

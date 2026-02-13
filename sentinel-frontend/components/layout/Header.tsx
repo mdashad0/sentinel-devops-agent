@@ -5,12 +5,12 @@ import { Button } from "@/components/common/Button";
 import { SentinelLogo } from "@/components/common/SentinelLogo";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useWebSocket } from "@/hooks/useWebSocket";
+import { useWebSocketContext } from "@/lib/WebSocketContext";
 import { Activity, Wifi, WifiOff } from "lucide-react";
 
 export function Header() {
     const [scrolled, setScrolled] = useState(false);
-    const { isConnected } = useWebSocket();
+    const { isConnected } = useWebSocketContext();
 
     useEffect(() => {
         const handleScroll = () => {

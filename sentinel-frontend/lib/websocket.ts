@@ -5,4 +5,5 @@ export type WebSocketMessage =
     | { type: 'INCIDENT_NEW'; data: any }
     | { type: 'INCIDENT_RESOLVED'; data: { id: string } };
 
-export const WS_URL = 'ws://localhost:4000';
+export const WS_URL = process.env.NEXT_PUBLIC_WS_URL ||
+    (typeof window !== 'undefined' ? `ws://${window.location.hostname}:4000` : 'ws://localhost:4000');

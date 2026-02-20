@@ -1,5 +1,7 @@
 "use client";
 
+import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { IncidentCard } from "@/components/dashboard/IncidentCard";
 import { Suspense, useState, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Activity, Clock, AlertCircle, FileWarning } from "lucide-react";

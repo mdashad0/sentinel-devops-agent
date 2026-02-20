@@ -5,7 +5,8 @@ import { Incident } from "@/lib/mockData";
 import { useWebSocketContext } from "../lib/WebSocketContext";
 import { parseInsight, InsightPayload } from "@/lib/parseInsight";
 
-export function useIncidents() {
+export function useIncidents(options: { manual?: boolean } = {}) {
+    const { manual } = options;
     const [incidents, setIncidents] = useState<Incident[]>([]);
     const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
     const { isConnected, lastMessage } = useWebSocketContext();

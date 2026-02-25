@@ -43,6 +43,8 @@ export function useKeyboardShortcuts() {
                 router.refresh();
             }
         },
+        { key: 'n', description: 'New Incident', handler: () => router.push('/dashboard/incidents/new') },
+        { key: 'c', description: 'Export Incidents', handler: () => console.log('Exporting...') },
     ], [router]);
 
     const handleKeyDown = useCallback((event: KeyboardEvent) => {

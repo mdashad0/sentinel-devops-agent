@@ -45,6 +45,7 @@ export function IncidentExport({ incidents, disabled = false }: IncidentExportPr
                 onClick={() => setIsOpen(!isOpen)}
                 disabled={disabled || incidents.length === 0}
                 className="flex items-center gap-2"
+                shortcutHint="C"
             >
                 <Download className="h-4 w-4" />
                 Export

@@ -1,7 +1,6 @@
 "use client";
 
-import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { IncidentCard } from "@/components/dashboard/IncidentCard";
+
 import { Suspense, useState, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Activity, Clock, AlertCircle, FileWarning } from "lucide-react";
@@ -12,6 +11,7 @@ import { IncidentExport } from "@/components/incidents/IncidentExport";
 import { TableSkeleton } from "@/components/incidents/TableSkeleton";
 import { Pagination } from "@/components/common/Pagination";
 import { useIncidentHistory, FilterState, SortConfig } from "@/hooks/useIncidentHistory";
+import { Button } from "@/components/common/Button";
 
 const defaultFilters: FilterState = {
     services: [],
@@ -121,7 +121,17 @@ function IncidentsContent() {
                             Comprehensive log of all system incidents and agent remediations.
                         </p>
                     </div>
-                    <IncidentExport incidents={incidents} disabled={isLoading} />
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="default"
+                            shortcutHint="N"
+                            onClick={() => router.push('/dashboard/incidents/new')}
+                            className="bg-primary hover:bg-primary/90 hidden sm:flex"
+                        >
+                            New Incident
+                        </Button>
+                        <IncidentExport incidents={incidents} disabled={isLoading} />
+                    </div>
                 </div>
 
                 {/* Stats Cards */}

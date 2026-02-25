@@ -36,17 +36,25 @@ export interface ButtonProps
     asChild?: boolean;
     variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "glass" | null;
     size?: "default" | "sm" | "lg" | "icon" | null;
+    shortcutHint?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant, size, asChild = false, ...props }, ref) => {
+    ({ className, variant, size, asChild = false, shortcutHint, children, ...props }, ref) => {
         const Comp = asChild ? Slot : "button";
         return (
             <Comp
-                className={cn(buttonVariants({ variant, size, className }))}
+                className={cn(buttonVariants({ variant, size, className }), shortcutHint && "group relative")}
                 ref={ref}
                 {...props}
-            />
+            >
+                {children}
+                {shortcutHint && !asChild && (
+                    <kbd className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity hidden md:inline-flex h-6 items-center gap-1 rounded border border-border bg-popover px-1.5 font-mono text-[10px] font-medium text-popover-foreground whitespace-nowrap z-100 shadow-sm">
+                        {shortcutHint}
+                    </kbd>
+                )}
+            </Comp>
         );
     }
 );
